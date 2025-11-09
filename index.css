@@ -1,0 +1,65 @@
+/* Global modern scrollbar styling */
+
+/* For Webkit-based browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1; /* A neutral gray, tailwind's slate-300 */
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8; /* A darker gray, tailwind's slate-400 */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent; /* thumb track */
+}
+
+/* Chat fade-out effect */
+.chat-scroll-container {
+  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+}
+
+/* Settings Dropdown */
+.settings-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem); /* Position below the button with a small gap */
+  background-color: #ffffff; /* gem-slate */
+  border: 1px solid #e2e8f0; /* gem-mist */
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  z-index: 20;
+  width: 12rem;
+  padding: 0.5rem 0;
+}
+
+.settings-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #1e293b; /* gem-offwhite */
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.settings-menu-item:hover {
+  background-color: #f8fafc; /* gem-onyx */
+}
