@@ -190,7 +190,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 </div>
             </header>
 
-            <div className="flex-grow pt-24 pb-32 overflow-y-auto px-4 chat-scroll-container">
+            <div className="flex-grow pt-24 pb-32 overflow-y-auto px-4">
                  <div className="w-full max-w-4xl mx-auto space-y-6">
                     {!isChatActive && (
                         <div className="text-center py-20">

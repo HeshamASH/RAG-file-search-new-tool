@@ -140,38 +140,12 @@ export async function generateExampleQuestions(ragStoreName: string): Promise<st
 
 
 export async function generateGoogleSearchQuestions(): Promise<string[]> {
-     if (!ai) throw new Error("Gemini AI not initialized");
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: "Generate 4 short and practical example questions a user might ask a Google Search agent about current events or popular topics. Return the questions as a JSON array of strings. For example: `[\"What are the latest AI trends?\", \"Summarize today's news headlines\"]`",
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.STRING
-                    }
-                }
-            }
-        });
-        
-        const jsonText = response.text.trim();
-        const questions = JSON.parse(jsonText);
-
-        if (Array.isArray(questions) && questions.every(q => typeof q === 'string')) {
-            return questions;
-        }
-        return [];
-    } catch (error) {
-        console.error("Failed to generate or parse Google Search example questions:", error);
-        return [
-            "What are the latest trends in AI?",
-            "Who won the F1 race last weekend?",
-            "What's the weather like in Tokyo?",
-            "Summarize the latest tech news."
-        ];
-    }
+    return [
+        "What are the latest advancements in AI agents?",
+        "Who are the leading companies in AI agent development?",
+        "Explain the concept of autonomous AI agents.",
+        "What are some real-world applications of AI agents today?"
+    ];
 }
 
 export async function deleteRagStore(ragStoreName: string): Promise<void> {

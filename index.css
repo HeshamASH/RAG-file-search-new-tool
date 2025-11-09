@@ -27,12 +27,6 @@
   scrollbar-color: #94a3b8 transparent; /* thumb track */
 }
 
-/* Chat fade-out effect */
-.chat-scroll-container {
-  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
-}
-
 /* Settings Dropdown */
 .settings-menu {
   position: absolute;
