@@ -14,9 +14,6 @@ interface UploadModalProps {
     isOpen: boolean;
     onClose: () => void;
     onUpload: (files: File[]) => Promise<void>;
-    apiKeyError: string | null;
-    isApiKeySelected: boolean;
-    onSelectKey: () => Promise<void>;
     uploadProgress: { current: number; total: number; message?: string; fileName?: string; } | null;
 }
 
@@ -38,7 +35,7 @@ const sampleDocuments = [
 ];
 
 const UploadModal: React.FC<UploadModalProps> = ({ 
-    isOpen, onClose, onUpload, apiKeyError, isApiKeySelected, onSelectKey, uploadProgress
+    isOpen, onClose, onUpload, uploadProgress
 }) => {
     const [files, setFiles] = useState<File[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -106,11 +103,6 @@ const UploadModal: React.FC<UploadModalProps> = ({
         setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToRemove));
     };
 
-    const handleSelectKeyClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        await onSelectKey();
-    };
-
     const handleClose = () => {
         if (uploadProgress) return; // Don't close during upload
         setFiles([]);
@@ -139,19 +131,6 @@ const UploadModal: React.FC<UploadModalProps> = ({
                         </div>
                         
                         <div className="flex-grow overflow-y-auto pr-2 -mr-2">
-                             <div className="w-full max-w-xl mx-auto mb-6">
-                                {!isApiKeySelected ? (
-                                    <button onClick={handleSelectKeyClick} className="w-full bg-gem-blue hover:bg-blue-500 text-white font-semibold rounded-lg py-3 px-5 text-center focus:outline-none focus:ring-2 focus:ring-gem-blue">
-                                        Select Gemini API Key to Begin
-                                    </button>
-                                ) : (
-                                    <div className="w-full bg-gem-onyx border border-gem-mist/50 rounded-lg py-3 px-5 text-center text-gem-teal font-semibold">
-                                        ✓ API Key Selected
-                                    </div>
-                                )}
-                                {apiKeyError && <p className="text-red-500 text-sm mt-2">{apiKeyError}</p>}
-                            </div>
-
                              <div 
                                 className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors mb-6 ${isDragging ? 'border-gem-blue bg-gem-onyx/50' : 'border-gem-mist/50'}`}
                                 onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
@@ -221,9 +200,9 @@ const UploadModal: React.FC<UploadModalProps> = ({
                             </button>
                              <button 
                                 onClick={handleConfirmUpload}
-                                disabled={!isApiKeySelected || files.length === 0}
+                                disabled={files.length === 0}
                                 className="px-6 py-2 rounded-md bg-gem-blue hover:bg-blue-500 text-white font-bold transition-colors disabled:bg-gem-mist/50 disabled:cursor-not-allowed"
-                                title={!isApiKeySelected ? "Please select an API key first" : (files.length === 0 ? "Please select a file first" : "Start chat session")}
+                                title={files.length === 0 ? "Please select a file first" : "Start chat session"}
                             >
                                 Upload and Chat
                             </button>

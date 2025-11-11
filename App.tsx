@@ -3,28 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AppStatus, ChatMessage, SearchSource } from './types';
 import * as geminiService from './services/geminiService';
 import Spinner from './components/Spinner';
 import UploadModal from './components/UploadModal';
 import ChatInterface from './components/ChatInterface';
 
-declare global {
-    interface AIStudio {
-        openSelectKey: () => Promise<void>;
-        hasSelectedApiKey: () => Promise<boolean>;
-    }
-    interface Window {
-        aistudio?: AIStudio;
-    }
-}
-
 const App: React.FC = () => {
     const [status, setStatus] = useState<AppStatus>(AppStatus.Initializing);
     const [searchSource, setSearchSource] = useState<SearchSource>(SearchSource.FileSearch);
-    const [isApiKeySelected, setIsApiKeySelected] = useState(false);
-    const [apiKeyError, setApiKeyError] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<{ current: number, total: number, message?: string, fileName?: string } | null>(null);
@@ -39,39 +27,10 @@ const App: React.FC = () => {
         ragStoreNameRef.current = activeRagStoreName;
     }, [activeRagStoreName]);
     
-    const checkApiKey = useCallback(async () => {
-        if (window.aistudio?.hasSelectedApiKey) {
-            try {
-                const hasKey = await window.aistudio.hasSelectedApiKey();
-                setIsApiKeySelected(hasKey);
-                 if (hasKey) {
-                    setApiKeyError(null);
-                    geminiService.initialize();
-                }
-            } catch (e) {
-                console.error("Error checking for API key:", e);
-                setIsApiKeySelected(false);
-            }
-        }
-    }, []);
-
     useEffect(() => {
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                checkApiKey();
-            }
-        };
-        
-        checkApiKey();
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('focus', checkApiKey);
-
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('focus', checkApiKey);
-        };
-    }, [checkApiKey]);
+        geminiService.initialize();
+        setStatus(AppStatus.Chatting);
+    }, []);
 
     useEffect(() => {
         const handleUnload = () => {
@@ -100,29 +59,7 @@ const App: React.FC = () => {
         setStatus(AppStatus.Chatting); // Return to the main chat view
     }
 
-    useEffect(() => {
-        setStatus(AppStatus.Chatting); // Start at the chat interface
-    }, []);
-
-    const handleSelectKey = async () => {
-        if (window.aistudio?.openSelectKey) {
-            try {
-                await window.aistudio.openSelectKey();
-                await checkApiKey();
-            } catch (err) {
-                console.error("Failed to open API key selection dialog", err);
-            }
-        } else {
-            console.log('window.aistudio.openSelectKey() not available.');
-            alert('API key selection is not available in this environment.');
-        }
-    };
-
     const handleUploadAndStartChat = async (files: File[]) => {
-        if (!isApiKeySelected) {
-            setApiKeyError("Please select your Gemini API Key first.");
-            return;
-        }
         if (files.length === 0) return;
         
         setStatus(AppStatus.Uploading);
@@ -168,13 +105,7 @@ const App: React.FC = () => {
             setStatus(AppStatus.Chatting);
             setIsUploadModalOpen(false);
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
-            if (errorMessage.includes('api key not valid') || errorMessage.includes('requested entity was not found')) {
-                setApiKeyError("The selected API key is invalid. Please select a different one and try again.");
-                setIsApiKeySelected(false);
-            } else {
-                handleError("Failed to start chat session", err);
-            }
+            handleError("Failed to start chat session", err);
         } finally {
             setUploadProgress(null);
             if (status !== AppStatus.Error) {
@@ -195,6 +126,16 @@ const App: React.FC = () => {
         setDocumentName('');
         setSearchSource(SearchSource.FileSearch);
         setStatus(AppStatus.Chatting);
+    };
+
+    const handleFileSearchClick = () => {
+        // If there's an active chat session (either FileSearch or GoogleSearch),
+        // end it to ensure a clean state before starting a new file upload.
+        if (activeRagStoreName || searchSource === SearchSource.GoogleSearch) {
+            handleEndChat();
+        }
+        // handleEndChat resets the searchSource to FileSearch, preparing for the new session.
+        setIsUploadModalOpen(true);
     };
 
     const handleSendMessage = async (message: string) => {
@@ -237,10 +178,6 @@ const App: React.FC = () => {
         setSearchSource(source);
 
         if (source === SearchSource.GoogleSearch) {
-             if (!isApiKeySelected) {
-                setApiKeyError("Please select your Gemini API Key to use Google Search.");
-                return;
-            }
             setIsQueryLoading(true);
             try {
                 const questions = await geminiService.generateGoogleSearchQuestions();
@@ -275,15 +212,12 @@ const App: React.FC = () => {
                             onSwitchSource={handleSwitchSource}
                             searchSource={searchSource}
                             isChatActive={!!activeRagStoreName || searchSource === SearchSource.GoogleSearch}
-                            onFileSearchClick={() => setIsUploadModalOpen(true)}
+                            onFileSearchClick={handleFileSearchClick}
                         />
                         <UploadModal
                             isOpen={isUploadModalOpen}
                             onClose={() => setIsUploadModalOpen(false)}
                             onUpload={handleUploadAndStartChat}
-                            apiKeyError={apiKeyError}
-                            isApiKeySelected={isApiKeySelected}
-                            onSelectKey={handleSelectKey}
                             uploadProgress={uploadProgress}
                         />
                     </>

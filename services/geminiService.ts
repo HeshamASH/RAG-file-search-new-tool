@@ -144,7 +144,7 @@ export async function generateGoogleSearchQuestions(): Promise<string[]> {
         "What are the latest advancements in AI agents?",
         "Who are the leading companies in AI agent development?",
         "Explain the concept of autonomous AI agents.",
-        "What are some real-world applications of AI agents today?"
+        "when did the file search tool in Gemini API came out"
     ];
 }
 

@@ -25,6 +25,16 @@ interface ChatInterfaceProps {
     onFileSearchClick: () => void;
 }
 
+const welcomeTitles = [
+    "What’s on your mind today?",
+    "Hey, Ready to dive into your docs?",
+    "What are you working on?",
+    "Ready when you are.",
+    "Good to see you",
+    "How can I help?",
+];
+
+
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
     documentName, history, isQueryLoading, onSendMessage, onNewChat, 
     exampleQuestions, onSwitchSource, searchSource, isChatActive, onFileSearchClick 
@@ -33,8 +43,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     const [currentSuggestion, setCurrentSuggestion] = useState('');
     const [modalContent, setModalContent] = useState<string | null>(null);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [welcomeTitle, setWelcomeTitle] = useState('');
     const chatEndRef = useRef<HTMLDivElement>(null);
     const settingsRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setWelcomeTitle(welcomeTitles[Math.floor(Math.random() * welcomeTitles.length)]);
+    }, []);
 
     useEffect(() => {
         if (!isChatActive || exampleQuestions.length === 0) {
@@ -151,11 +166,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     return (
         <div className="flex flex-col h-screen relative">
-            <header className="absolute top-0 left-0 right-0 p-4 bg-gem-onyx/80 backdrop-blur-sm z-10 flex justify-between items-center border-b border-gem-mist">
+            <header className="absolute top-0 left-0 right-0 p-4 bg-gem-onyx/80 backdrop-blur-sm z-10 flex justify-between items-center">
                 <div className="w-full max-w-4xl mx-auto flex justify-between items-center px-4">
-                    <h1 className="text-2xl font-bold text-gem-offwhite truncate" title={`Chat with ${documentName}`}>
-                        {isChatActive ? `Chat with ${documentName}` : 'Ask the Manual'}
-                    </h1>
+                    <div className="flex items-baseline space-x-3 truncate">
+                        <h1 className="text-2xl font-bold text-gem-offwhite">
+                            MnemoMind
+                        </h1>
+                         {isChatActive && (
+                            <span className="text-lg text-gem-offwhite/70 truncate" title={documentName}>
+                                {searchSource === SearchSource.FileSearch ? 'chat with your document' : 'ask google search'}
+                            </span>
+                        )}
+                    </div>
                     <div className="flex items-center space-x-2">
                          {isChatActive && (
                             <button
@@ -194,10 +216,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                  <div className="w-full max-w-4xl mx-auto space-y-6">
                     {!isChatActive && (
                         <div className="text-center py-20">
-                            <h2 className="text-4xl font-bold text-gem-offwhite mb-4">Welcome!</h2>
-                            <p className="text-lg text-gem-offwhite/70 mb-8">
-                                Please select a data source from the settings menu <SettingsIcon className="inline-block h-6 w-6 align-text-bottom" /> to begin.
-                            </p>
+                            <h2 className="text-4xl font-bold text-gem-offwhite mb-8">{welcomeTitle}</h2>
                             <div className="flex justify-center space-x-4">
                                 <button onClick={onFileSearchClick} className="flex items-center px-6 py-3 bg-gem-slate hover:bg-gem-mist transition-colors rounded-lg text-lg font-semibold">
                                     <FileIcon className="mr-2"/>
